@@ -600,6 +600,21 @@ textarea:focus { border-bottom-color: var(--text); }
    ЭКРАН 5 · Артефакт
    ↓ РЕДАКТИРОВАТЬ: название артефакта, подписи полей
 ══════════════════════════════════════════════════ -->
+<!-- ПОВТОРНАЯ САМООЦЕНКА · перед персональным результатом -->
+<section class="screen" id="s4post">
+  <span class="tiny">После диагностики и рефлексии</span>
+  <div class="h2">Вернёмся к первому вопросу</div>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:18px">Ответьте ещё раз, исходя из того, как вы сейчас оцениваете свои привычки. Здесь нет правильного ответа.</p>
+  <div class="h2" style="font-size:23px">Насколько тщательно<br>вы проверяете ответы ИИ?</div>
+  <div class="choice-group" id="ratingChoicesAfter">
+    <button class="choice-btn" onclick="ratingPickAfter(this,'high')">Очень тщательно. Обычно мне удаётся заметить основные проблемы и ограничения ответа.</button>
+    <button class="choice-btn" onclick="ratingPickAfter(this,'med-high')">Скорее тщательно. Проверяю важные моменты, хотя могу что-то упустить.</button>
+    <button class="choice-btn" onclick="ratingPickAfter(this,'med')">Частично. Проверяю отдельные аспекты, но не всегда понимаю, чего ещё может не хватать.</button>
+    <button class="choice-btn" onclick="ratingPickAfter(this,'low')">Минимально. Обычно ориентируюсь на то, насколько ответ выглядит убедительным.</button>
+  </div>
+  <div class="btn-row"><button class="btn btn-primary" id="btn_post" disabled onclick="next()">Посмотреть мою карту →</button></div>
+</section>
+
 <section class="screen" id="s5">
   <div class="cycle-progress">
     <div class="cp done"></div><div class="cp done"></div><div class="cp done"></div>
@@ -610,7 +625,7 @@ textarea:focus { border-bottom-color: var(--text); }
   <span class="tiny">Результат цикла</span>
   <!-- ↓ Заголовок -->
   <div class="h2">Ваша карта<br>сохранена</div>
-  <p style="color:var(--muted);font-size:14px;margin-bottom:6px">Первая версия. В следующих модулях он будет уточняться.</p>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:6px">Первая версия. В следующих модулях она будет уточняться.</p>
 
   <!-- ↓ Артефакт — редактируйте название и подписи полей -->
   <div class="artifact-wrap">
@@ -703,7 +718,7 @@ textarea:focus { border-bottom-color: var(--text); }
 // ══════════════════════════════════════════════════
 // НАВИГАЦИЯ
 // ══════════════════════════════════════════════════
-const SCREENS = ['s0','s1','s2','s3','s3b','s4','s5','s6'];
+const SCREENS = ['s0','s1','s2','s3','s3b','s4','s4post','s5','s6'];
 const STAGE_LABELS = [
   'Обложка',
   'Шаг 1 · Диагностика',
@@ -711,12 +726,15 @@ const STAGE_LABELS = [
   'Шаг 3 · Применение',
   '',
   'Шаг 4 · Рефлексия',
+  'Повторная самооценка',
   'Шаг 5 · Артефакт',
   'Итог'
 ];
 
 let cur = 0;
 let selfRating = '';
+let selfRatingAfter = '';
+let completedTracked = false;
 let step3answer = '';
 
 // Ответы на 6 поведенческих вопросов
@@ -744,6 +762,11 @@ function updateUI() {
   document.getElementById('stageLabel').textContent = STAGE_LABELS[cur] || '';
   document.getElementById('backBtn').classList.toggle('visible', cur > 0);
   window.scrollTo(0, 0);
+  if (SCREENS[cur] === 's6' && !completedTracked) {
+    completedTracked = true;
+    trackEvent('module_complete', '', '', 's6');
+  }
+  trackEvent('screen_view', SCREENS[cur], '', SCREENS[cur]);
 }
 
 function next() {
@@ -764,7 +787,7 @@ function goScreen(id) {
 // ══════════════════════════════════════════════════
 function ratingPick(btn, val) {
   selfRating = val;
-  trackEvent('self_rating', 'self_rating', val, 's1');
+  trackEvent('self_rating', 'self_rating_before', val, 's1');
   document.querySelectorAll('#ratingChoices .choice-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
 
@@ -772,8 +795,8 @@ function ratingPick(btn, val) {
   const miniMap = {
     high:       'Хорошо. Давайте проверим эту оценку на конкретных привычках.',
     'med-high': 'Звучит разумно. Посмотрим, что стоит за этим на практике.',
-    med:        'Честная оценка. Посмотрим, что стоит за «иногда».',
-    low:        'Честная оценка — и хорошая отправная точка.'
+    med:        'Спасибо. Посмотрим, что стоит за этой оценкой.',
+    low:        'Спасибо. Это отправная точка для наблюдения за привычками.'
   };
 
   const fb = document.getElementById('ratingFb');
@@ -792,6 +815,7 @@ function ratingPick(btn, val) {
 
 function qPick(q, btn, val) {
   behaviorAnswers[q] = val;
+  trackEvent('behavior_answer', q, val, 's1');
   const group = btn.closest('.bq-choices');
   group.querySelectorAll('.bq-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
@@ -807,10 +831,10 @@ function qPick(q, btn, val) {
 // ↓ Генерирует зеркало на основе самооценки и 6 ответов
 function generateMirror() {
   const selfLabels = {
-    high:       'достаточно критичного пользователя',
-    'med-high': 'скорее критичного пользователя',
-    med:        'пользователя с умеренным уровнем критичности',
-    low:        'пользователя, который доверяет ИИ интуитивно'
+    high:       'пользователя, который очень тщательно проверяет ответы',
+    'med-high': 'пользователя, который скорее тщательно проверяет ответы',
+    med:        'пользователя, который проверяет ответы частично',
+    low:        'пользователя, который обычно ориентируется на убедительность ответа'
   };
 
   // Определяем «слабые» паттерны по каждому вопросу
@@ -877,6 +901,7 @@ const decisionLabels = {
 };
 
 function casePick(num, btn, val) {
+  trackEvent('case_answer', 'case' + num, val, 's3');
   if (num === 3) step3answer = val; // для артефакта
 
   const choices = btn.closest('.bq-choices');
@@ -921,11 +946,23 @@ function checkRefs() {
 // ЭКРАН 5 · Артефакт — заполнение из рефлексии
 // ══════════════════════════════════════════════════
 function populateAndNext() {
+  for (let i = 1; i <= 3; i++) {
+    trackEvent('reflection', 'ref' + i, document.getElementById('ref' + i).value.trim(), 's4');
+  }
   document.getElementById('af_ref1').textContent = document.getElementById('ref1').value.trim();
   document.getElementById('af_ref2').textContent = document.getElementById('ref2').value.trim();
   document.getElementById('af_ref3').textContent = document.getElementById('ref3').value.trim();
   document.getElementById('af_decision').textContent = decisionLabels[step3answer] || '—';
   next();
+}
+
+// Итоговое измерение: значения и формулировки совпадают с первоначальными.
+function ratingPickAfter(btn, val) {
+  selfRatingAfter = val;
+  document.querySelectorAll('#ratingChoicesAfter .choice-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('btn_post').disabled = false;
+  trackEvent('self_rating', 'self_rating_after', val, 's4post');
 }
 
 // ── Инициализация ──

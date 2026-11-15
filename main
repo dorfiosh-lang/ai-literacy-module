@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Модуль 00 — Как вы на самом деле работаете с ИИ</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════
+   ДИЗАЙН-СИСТЕМА
+   Меняйте переменные здесь — стиль поменяется везде
+══════════════════════════════════════════════════ */
+:root {
+  --bg: #FFFFFF;
+  --paper: #F8F7F5;
+  --text: #3D3A37;
+  --ink: #2E2B28;
+  --gray: #C5C5BD;
+  --gray-soft: #E8E5DF;
+  --accent: #E6DAC6;
+  --muted: #9A9590;
+  --amber: #E85D3A;
+  --amber-pale: #FEF0EC;
+  --dark-bg: #3A3530;
+  --dark-text: #F5F2EE;
+  --orange-light: #FAC5B4;
+  --display: 'Manrope', sans-serif;
+  --sans: 'Inter', sans-serif;
+  --mono: 'Inter', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg); color: var(--text); font-family: var(--sans);
+  font-weight: 300; font-size: 16px; line-height: 1.65;
+  min-height: 100vh; -webkit-font-smoothing: antialiased; letter-spacing: .01em;
+}
+/* ── Прогресс и навигация ── */
+.progress-bar {
+  position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  z-index: 100; pointer-events: none;
+}
+.pdots { display: flex; align-items: center; gap: 0; }
+.pdot {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--gray);
+  flex-shrink: 0; transition: all .35s ease;
+}
+.pdot.active { background: var(--amber); transform: scale(1.6); animation: breathe 2.6s ease-in-out infinite; }
+.pdot.done { background: var(--amber); opacity: .28; }
+.pline { width: 14px; height: 1px; background: var(--gray-soft); flex-shrink: 0; }
+@keyframes breathe {
+  0%,100% { opacity:1; transform:scale(1.6); }
+  50%      { opacity:.5; transform:scale(1.1); }
+}
+.stage-label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--muted); white-space: nowrap;
+}
+.back-btn {
+  position: fixed; top: 26px; left: 28px; z-index: 101;
+  background: none; border: none; font-family: var(--mono); font-size: 10px;
+  color: var(--muted); cursor: pointer; letter-spacing: .14em;
+  text-transform: uppercase; display: none; transition: color .2s;
+}
+.back-btn:hover { color: var(--text); }
+.back-btn.visible { display: block; }
+/* ── Layout ── */
+main { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 88px 32px 64px; }
+.screen { width: 100%; max-width: 660px; display: none; }
+.screen.active { display: block; animation: fadeUp .5s cubic-bezier(.22,.68,0,1.08); }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(18px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+/* ── Типографика ── */
+.label { font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 20px; }
+.h1 { font-family: var(--display); font-weight: 800; font-size: clamp(44px, 8vw, 72px); line-height: .96; letter-spacing: -.05em; color: var(--ink); margin-bottom: 26px; }
+.h2 { font-family: var(--display); font-weight: 700; font-size: clamp(24px, 4vw, 38px); line-height: 1.06; letter-spacing: -.03em; color: var(--ink); margin-bottom: 20px; }
+.lead { font-size: 18px; line-height: 1.72; font-weight: 300; margin-bottom: 18px; }
+p { margin-bottom: 14px; line-height: 1.72; }
+.small { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.tiny { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: block; }
+.divider { width: 28px; height: 1px; background: var(--text); opacity: .14; margin: 18px 0 26px; }
+/* ── Кнопки ── */
+.btn { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; padding: 13px 32px; border: none; cursor: pointer; transition: all .22s ease; display: inline-block; }
+.btn-primary { background: var(--amber); color: #fff; }
+.btn-primary:hover { background: #D04F2E; transform: translateY(-1px); }
+.btn-primary:disabled { opacity: .3; cursor: not-allowed; transform: none; }
+.btn-secondary { background: transparent; color: var(--amber); border: 1px solid var(--amber); }
+.btn-secondary:hover { background: var(--amber-pale); }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 26px; }
+/* ── Кнопки выбора ── */
+.choice-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+.choice-btn {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 12px 22px; border: 1px solid var(--gray-soft); background: var(--bg);
+  color: var(--muted); cursor: pointer; transition: all .2s;
+}
+.choice-btn:hover { border-color: var(--text); color: var(--text); }
+.choice-btn.selected { border-color: var(--amber); color: var(--amber); background: var(--amber-pale); }
+/* ── Фидбек ── */
+.feedback { background: var(--amber-pale); border-left: 2px solid var(--amber); padding: 18px 22px; margin: 14px 0; font-size: 14px; line-height: 1.78; display: none; animation: fadeUp .3s ease; }
+.feedback.show { display: block; }
+.fb-label { font-family: var(--mono); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--amber); margin-bottom: 10px; display: block; }
+/* ── Список поведений (экран диагностики) ── */
+.behavior-list { list-style: none; padding: 0; margin: 14px 0 18px; }
+.behavior-list li {
+  font-size: 14px; line-height: 1.65; padding: 8px 0;
+  border-bottom: 1px solid var(--gray-soft);
+  display: flex; align-items: baseline; gap: 12px; color: var(--text);
+}
+.behavior-list li:last-child { border-bottom: none; }
+.behavior-list li::before { content: '·'; color: var(--amber); font-size: 18px; line-height: 1; flex-shrink: 0; }
+/* ── Секция B (скрытая, открывается после первого выбора) ── */
+.section-b { display: none; margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--gray-soft); animation: fadeUp .4s ease; }
+.section-b.show { display: block; }
+.section-b-label { font-family: var(--mono); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; display: block; }
+/* ── Карточка ответа ИИ ── */
+.ai-card { background: var(--paper); border: 1px solid var(--gray-soft); padding: 22px 24px; margin: 18px 0; }
+.ai-card-label { font-family: var(--mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--gray-soft); display: block; }
+.ai-card-prompt { font-family: var(--mono); font-size: 12px; color: var(--muted); background: var(--bg); padding: 8px 12px; margin-bottom: 14px; border-left: 2px solid var(--gray-soft); font-style: italic; }
+.ai-card-title { font-family: var(--display); font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 10px; }
+.ai-card ul { list-style: none; padding: 0; }
+.ai-card ul li { font-size: 14px; line-height: 1.65; padding: 5px 0; border-bottom: 1px solid var(--gray-soft); color: var(--text); display: flex; gap: 10px; }
+.ai-card ul li:last-child { border-bottom: none; }
+.ai-card ul li::before { content: '—'; color: var(--muted); font-size: 12px; flex-shrink: 0; padding-top: 2px; }
+.ai-card-note { font-size: 12px; color: var(--muted); margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--gray-soft); font-style: italic; }
+/* ── Теоретический блок ── */
+.theory-block { border: 1px solid var(--gray-soft); background: var(--paper); padding: 24px 26px; margin: 18px 0; }
+.theory-block .concept-tag { font-family: var(--mono); font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--gray-soft); display: block; }
+.theory-block p { font-size: 14px; line-height: 1.82; margin-bottom: 12px; }
+.theory-block p:last-child { margin-bottom: 0; }
+.theory-block strong { font-weight: 500; color: var(--ink); }
+/* ── Пулл-цитата ── */
+.pull-quote { font-family: var(--sans); font-size: clamp(16px, 2.6vw, 21px); font-weight: 300; font-style: italic; line-height: 1.46; border-left: 2px solid var(--amber); padding-left: 20px; margin: 24px 0; color: var(--text); }
+/* ── Концепт-пилюли ── */
+.concept-pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 6px; }
+.concept-pill { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; background: var(--paper); border: 1px solid var(--gray-soft); color: var(--muted); padding: 4px 10px; }
+/* ── Поля ввода ── */
+.field-group { margin-bottom: 22px; }
+.field-label { font-family: var(--mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; }
+textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--gray-soft); padding: 8px 0; font-family: var(--sans); font-size: 15px; font-weight: 300; color: var(--text); outline: none; resize: none; line-height: 1.6; transition: border-color .2s; min-height: 60px; }
+textarea:focus { border-bottom-color: var(--text); }
+/* ── Артефакт ── */
+.artifact-wrap { background: var(--paper); border: 1px solid var(--gray-soft); padding: 28px 30px; margin: 18px 0; }
+.artifact-header { text-align: center; padding-bottom: 18px; border-bottom: 1px solid var(--gray-soft); margin-bottom: 20px; }
+.artifact-title { font-family: var(--display); font-weight: 600; font-size: 17px; letter-spacing: -.02em; color: var(--ink); }
+.artifact-meta { font-family: var(--mono); font-size: 9px; letter-spacing: .16em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+.af-row { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--gray-soft); }
+.af-row:last-child { border-bottom: none; }
+.af-num { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: .1em; padding-top: 2px; }
+.af-label { font-size: 12px; font-weight: 400; color: var(--muted); line-height: 1.5; margin-bottom: 2px; }
+.af-value { font-size: 14px; color: var(--ink); line-height: 1.6; }
+.af-value.decision { color: var(--amber); font-weight: 500; }
+.af-value.empty { color: var(--gray); font-style: italic; }
+.artifact-footer { text-align: center; font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding-top: 16px; border-top: 1px solid var(--gray-soft); margin-top: 16px; }
+/* ── Прогресс внутри модуля ── */
+.cycle-progress { display: flex; gap: 5px; margin-bottom: 20px; align-items: center; }
+.cp { width: 24px; height: 2px; background: var(--gray-soft); }
+.cp.done { background: var(--amber); opacity: .5; }
+.cp.active { background: var(--amber); }
+.cycle-label { font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-left: 8px; }
+/* ── Шапка экрана ── */
+.step-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 26px; padding-bottom: 16px; border-bottom: 1px solid var(--gray-soft); }
+.step-kicker { font-family: var(--mono); font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: var(--amber); margin-bottom: 4px; }
+.step-num-big { font-family: var(--display); font-size: clamp(52px, 9vw, 82px); font-weight: 800; line-height: .88; letter-spacing: -.05em; color: var(--orange-light); flex-shrink: 0; }
+/* ── Обложка ── */
+.what-list { list-style: none; padding: 0; margin: 0; }
+.what-list li { font-size: 14px; line-height: 1.65; padding: 9px 0; border-bottom: 1px solid var(--gray-soft); display: flex; align-items: baseline; gap: 12px; color: var(--text); }
+.what-list li:last-child { border-bottom: none; }
+.what-list li::before { content: '→'; color: var(--amber); font-size: 12px; flex-shrink: 0; }
+.module-meta { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0 26px; }
+.module-meta-item { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); }
+.module-meta-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gray); flex-shrink: 0; }
+/* ── Итог модуля ── */
+.takeaway-block { border: 1px solid var(--gray-soft); border-left: 2px solid var(--ink); padding: 20px 22px; margin: 18px 0; }
+.takeaway-block p { font-size: 14px; line-height: 1.78; margin-bottom: 8px; }
+.takeaway-block p:last-child { margin-bottom: 0; }
+.next-module { background: var(--dark-bg); padding: 20px 22px; margin: 18px 0; }
+.next-module .next-label { font-family: var(--mono); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: rgba(245,242,238,.45); margin-bottom: 8px; display: block; }
+.next-module .next-title { font-family: var(--display); font-weight: 600; font-size: 15px; color: var(--dark-text); margin-bottom: 6px; }
+.next-module .next-desc { font-size: 13px; color: rgba(245,242,238,.65); line-height: 1.6; }
+/* ── Поведенческие вопросы (S1 часть B) ── */
+.bq { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--gray-soft); }
+.bq:last-of-type { border-bottom: none; margin-bottom: 0; }
+.bq-num { font-family: var(--mono); font-size: 9px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; display: block; }
+.bq-text { font-size: 14px; line-height: 1.62; color: var(--ink); margin-bottom: 10px; font-weight: 400; }
+.bq-choices { display: flex; flex-wrap: wrap; gap: 6px; }
+.bq-btn {
+  font-family: var(--sans); font-size: 12px; font-weight: 400; letter-spacing: .01em;
+  color: var(--text); background: var(--paper); border: 1px solid var(--gray-soft);
+  padding: 8px 13px; cursor: pointer; transition: all .18s; line-height: 1.4;
+  flex-shrink: 0;
+}
+.bq-btn:hover { border-color: var(--gray); background: #fff; }
+.bq-btn.selected { border-color: var(--amber); background: var(--amber-pale); color: var(--ink); }
+/* Зеркало — появляется после всех 6 ответов */
+.mirror-block { background: var(--paper); border-left: 3px solid var(--amber); padding: 18px 20px; margin-top: 22px; display: none; }
+.mirror-block.show { display: block; animation: fadeUp .4s ease; }
+.mirror-block .fb-label { font-family: var(--mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--amber); display: block; margin-bottom: 10px; }
+.mirror-block p { font-size: 14px; line-height: 1.72; margin-bottom: 9px; }
+.mirror-block p:last-child { margin-bottom: 0; }
+.mirror-bullets { list-style: none; padding: 0; margin: 10px 0 12px; }
+.mirror-bullets li { font-size: 14px; line-height: 1.6; padding: 3px 0; display: flex; gap: 10px; }
+.mirror-bullets li::before { content: '·'; color: var(--amber); flex-shrink: 0; }
+/* ── Кейсы (S3) ── */
+.case-tag { font-family: var(--mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: block; }
+.case-scenario { font-size: 14px; line-height: 1.72; color: var(--text); margin-bottom: 4px; }
+.case-scenario ul { list-style: none; padding: 0; margin: 8px 0 12px; }
+.case-scenario ul li { font-size: 13px; padding: 2px 0 2px 16px; position: relative; color: var(--muted); }
+.case-scenario ul li::before { content: '·'; position: absolute; left: 0; color: var(--amber); }
+.case-q-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.case-sep { height: 1px; background: var(--gray-soft); margin: 24px 0; display: none; }
+.case-sep.show { display: block; }
+/* ── Переходный блок (S3b) ── */
+.bridge-block { background: var(--paper); border: 1px solid var(--gray-soft); padding: 24px 26px; margin: 18px 0; }
+.bridge-block p { font-size: 15px; line-height: 1.78; margin-bottom: 12px; color: var(--text); }
+.bridge-block p:last-child { margin-bottom: 0; }
+/* ── Адаптив ── */
+@media (max-width: 640px) {
+  main { padding: 80px 18px 50px; }
+  .h1 { font-size: clamp(40px, 12vw, 58px); }
+  .h2 { font-size: clamp(22px, 6vw, 32px); }
+  .artifact-wrap { padding: 20px 16px; }
+  .step-num-big { font-size: 52px; }
+  .choice-btn { font-size: 10px; padding: 11px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar">
+  <div class="pdots" id="pdots"></div>
+  <div class="stage-label" id="stageLabel"></div>
+</div>
+<button class="back-btn" id="backBtn" onclick="prev()">← назад</button>
+
+<main>
+
+<!-- ══════════════════════════════════════════════════
+   ЭКРАН 0
+   ↓ РЕДАКТИРОВАТЬ: заголовок, лид, список, мета
+══════════════════════════════════════════════════ -->
+<section class="screen active" id="s0">
+  <span class="label">Курс «Мышление в эпоху ИИ» · Модуль 00</span>
+  <!-- ↓ Заголовок модуля -->
+  <div class="h1">Как вы<br>на самом деле<br>работаете с ИИ</div>
+  <div class="divider"></div>
+  <!-- ↓ Вводный текст -->
+  <p class="lead">Большинство людей убеждены, что используют ИИ грамотно.</p>
+  <p style="color:var(--muted);font-size:15px;line-height:1.75">Вопрос в другом: совпадает ли это убеждение с тем, что происходит на практике? В конкретных задачах, под реальной нагрузкой, когда нет времени думать долго.</p>
+  <!-- ↓ Метаданные -->
+  <div class="module-meta">
+    <div class="module-meta-item"><div class="module-meta-dot"></div>~30 минут</div>
+    <div class="module-meta-item"><div class="module-meta-dot"></div>1 диагностика</div>
+    <div class="module-meta-item"><div class="module-meta-dot"></div>1 кейс</div>
+    <div class="module-meta-item"><div class="module-meta-dot"></div>1 артефакт</div>
+  </div>
+  <!-- ↓ Список — что будет -->
+  <div style="border:1px solid var(--gray-soft);padding:20px 22px;margin:0 0 24px">
+    <span style="font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:14px">В этом модуле</span>
+    <ul class="what-list">
+      <li>Оцените свой уровень критичности</li>
+      <li>Узнаете, почему наш мозг часто останавливается раньше, чем нужно</li>
+      <li>Поработаете с реальным кейсом: не что проверять, а как выбрать стратегию</li>
+      <li>Сформулируете личные зоны автоматического доверия</li>
+    </ul>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="next()">Начать модуль</button>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════
+   ЭКРАН 1 · Когнитивный конфликт
+   Часть A: самооценка → Часть B: поведенческая диагностика
+   ↓ РЕДАКТИРОВАТЬ: вопросы, варианты, фидбек в JS
+══════════════════════════════════════════════════ -->
+<section class="screen" id="s1">
+  <div class="cycle-progress">
+    <div class="cp active"></div><div class="cp"></div><div class="cp"></div>
+    <div class="cp"></div><div class="cp"></div><div class="cp"></div>
+    <span class="cycle-label">шаг 1 / 6 · диагностика</span>
+  </div>
+
+  <!-- ЧАСТЬ A · Самооценка -->
+  <span class="tiny">Начнём с самооценки</span>
+  <!-- ↓ Вопрос А -->
+  <div class="h2">Как вы подходите<br>к ответам ИИ?</div>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:4px">Выберите описание, которое вам ближе всего.</p>
+
+  <!-- ↓ Варианты самооценки -->
+  <div class="choice-group" id="ratingChoices">
+    <button class="choice-btn" onclick="ratingPick(this,'high')">Проверяю тщательно: факты, источники, альтернативы</button>
+    <button class="choice-btn" onclick="ratingPick(this,'med-high')">Проверяю, когда что-то кажется неточным или важным</button>
+    <button class="choice-btn" onclick="ratingPick(this,'med')">Доверяю большинству — иногда перепроверяю</button>
+    <button class="choice-btn" onclick="ratingPick(this,'low')">Использую ответы практически как есть</button>
+  </div>
+
+  <!-- Мини-фидбек после выбора A — открывает часть B -->
+  <div class="feedback" id="ratingFb"></div>
+
+  <!-- ЧАСТЬ B · Поведенческая диагностика (скрыта до выбора A) -->
+  <div class="section-b" id="sectionB">
+    <span class="section-b-label">Теперь конкретнее — последние 2–3 дня</span>
+    <!-- ↓ Фреймирующая инструкция -->
+    <p style="font-size:14px;color:var(--muted);margin-bottom:20px">Вспомните реальные рабочие сессии с ИИ. Отвечайте на основе того, что было, — не того, как обычно бывает.</p>
+
+    <!-- ↓ Q1 -->
+    <div class="bq">
+      <span class="bq-num">вопрос 1 / 6</span>
+      <p class="bq-text">Как часто вы брали первый ответ ИИ без запроса альтернатив?</p>
+      <div class="bq-choices">
+        <button class="bq-btn" onclick="qPick('q1',this,'never')">Ни разу — всегда запрашивал дополнительно</button>
+        <button class="bq-btn" onclick="qPick('q1',this,'few')">1–2 раза</button>
+        <button class="bq-btn" onclick="qPick('q1',this,'many')">3–5 раз</button>
+        <button class="bq-btn" onclick="qPick('q1',this,'always')">Практически каждый раз</button>
+      </div>
+    </div>
+
+    <!-- ↓ Q2 -->
+    <div class="bq">
+      <span class="bq-num">вопрос 2 / 6</span>
+      <p class="bq-text">Сколько раз вы проверяли конкретные цифры или факты в другом источнике?</p>
+      <div class="bq-choices">
+        <button class="bq-btn" onclick="qPick('q2',this,'never')">Ни разу</button>
+        <button class="bq-btn" onclick="qPick('q2',this,'few')">1–2 раза</button>
+        <button class="bq-btn" onclick="qPick('q2',this,'many')">3 раза и более</button>
+        <button class="bq-btn" onclick="qPick('q2',this,'always')">Каждый раз, когда были цифры</button>
+      </div>
+    </div>
+
+    <!-- ↓ Q3 -->
+    <div class="bq">
+      <span class="bq-num">вопрос 3 / 6</span>
+      <p class="bq-text">Сколько раз вы запрашивали альтернативное решение той же задачи?</p>
+      <div class="bq-choices">
+        <button class="bq-btn" onclick="qPick('q3',this,'never')">Ни разу</button>
+        <button class="bq-btn" onclick="qPick('q3',this,'once')">1 раз</button>
+        <button class="bq-btn" onclick="qPick('q3',this,'few')">2–3 раза</button>
+        <button class="bq-btn" onclick="qPick('q3',this,'many')">Несколько раз — это часть моей работы с ИИ</button>
+      </div>
+    </div>
+
+    <!-- ↓ Q4 -->
+    <div class="bq">
+      <span class="bq-num">вопрос 4 / 6</span>
+      <p class="bq-text">Сколько раз вы обращались к другому источнику, чтобы проверить ответ ИИ?</p>
+      <div class="bq-choices">
+        <button class="bq-btn" onclick="qPick('q4',this,'never')">Ни разу</button>
+        <button class="bq-btn" onclick="qPick('q4',this,'once')">1 раз</button>
+        <button class="bq-btn" onclick="qPick('q4',this,'few')">2–3 раза</button>
+        <button class="bq-btn" onclick="qPick('q4',this,'many')">Несколько раз</button>
+      </div>
+    </div>
+
+    <!-- ↓ Q5 -->
+    <div class="bq">
+      <span class="bq-num">вопрос 5 / 6</span>
+      <p class="bq-text">Сколько раз вы просили ИИ объяснить логику ответа или назвать предположения, на которых он строится?</p>
+      <div class="bq-choices">
+        <button class="bq-btn" onclick="qPick('q5',this,'never')">Ни разу</button>
+        <button class="bq-btn" onclick="qPick('q5',this,'once')">1 раз</button>
+        <button class="bq-btn" onclick="qPick('q5',this,'few')">2–3 раза</button>
+        <button class="bq-btn" onclick="qPick('q5',this,'many')">Несколько раз</button>
+      </div>
+    </div>
+
+    <!-- ↓ Q6 -->
+    <div class="bq">
+      <span class="bq-num">вопрос 6 / 6</span>
+      <p class="bq-text">Сколько раз вы полностью отказались от рекомендации ИИ и сделали иначе?</p>
+      <div class="bq-choices">
+        <button class="bq-btn" onclick="qPick('q6',this,'never')">Ни разу</button>
+        <button class="bq-btn" onclick="qPick('q6',this,'once')">1 раз</button>
+        <button class="bq-btn" onclick="qPick('q6',this,'few')">2–3 раза</button>
+        <button class="bq-btn" onclick="qPick('q6',this,'many')">Более 3 раз</button>
+      </div>
+    </div>
+
+    <!-- Зеркало — появляется после ответов на все 6 вопросов -->
+    <div class="mirror-block" id="mirrorBlock"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn_s1" disabled onclick="next()">Читать теорию →</button>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════
+   ЭКРАН 2 · Теория
+   ↓ РЕДАКТИРОВАТЬ: параграфы, пулл-цитату, концепты
+══════════════════════════════════════════════════ -->
+<section class="screen" id="s2">
+  <div class="cycle-progress">
+    <div class="cp done"></div><div class="cp active"></div><div class="cp"></div>
+    <div class="cp"></div><div class="cp"></div><div class="cp"></div>
+    <span class="cycle-label">шаг 2 / 6 · теория</span>
+  </div>
+
+  <span class="tiny">Короткая теория</span>
+  <div class="h2">Почему<br>так происходит</div>
+
+  <div class="theory-block">
+    <span class="concept-tag">Три механизма, которые работают почти у всех</span>
+    <p>Многие уверены, что тщательно проверяют ответы ИИ. Но если вспомнить последние несколько запросов, часто оказывается, что проверка выглядела примерно так: прочитал ответ, он показался логичным — значит, всё в порядке.</p>
+    <p>Дело не в невнимательности. Наш мозг устроен так, чтобы не тратить лишние ресурсы. Когда находится вариант, который выглядит <strong>достаточно хорошим</strong>, поиск обычно заканчивается. В большинстве ситуаций это помогает экономить время и силы. Но при работе с ИИ этот механизм срабатывает особенно легко: готовый ответ появляется сразу, а чтобы увидеть альтернативу, нужно специально попросить её показать.</p>
+    <p>Есть и другая особенность. Если текст написан уверенно, хорошо структурирован и легко читается, нам начинает казаться, что он качественный. Мозг часто использует понятность как быстрый сигнал надёжности. Поэтому фраза «я проверил ответ» нередко означает «я прочитал его и не заметил ничего странного».</p>
+    <p>В результате многие люди оказываются в любопытной ситуации: они считают себя достаточно критичными пользователями ИИ, но редко ищут альтернативные варианты, проверяют исходные данные или пытаются оспорить полученный ответ. Не потому, что не хотят. Просто в условиях дедлайнов, большого количества задач и постоянных переключений мозг выбирает самый экономный путь.</p>
+  </div>
+
+  <div class="pull-quote">
+    «Большинство людей начинают доверять ИИ не потому, что приняли такое решение. Они просто перестают замечать момент, когда перестают проверять.»
+  </div>
+
+  <div class="concept-pills">
+    <span class="concept-pill">Достаточно хороший ответ</span>
+    <span class="concept-pill">Лёгкость = доверие</span>
+    <span class="concept-pill">Когнитивная экономия</span>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="next()">Применить →</button>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════
+   ЭКРАН 3 · Применение — три кейса
+   ↓ РЕДАКТИРОВАТЬ: тексты кейсов и разборов
+══════════════════════════════════════════════════ -->
+<section class="screen" id="s3">
+  <div class="cycle-progress">
+    <div class="cp done"></div><div class="cp done"></div><div class="cp active"></div>
+    <div class="cp"></div><div class="cp"></div><div class="cp"></div>
+    <span class="cycle-label">шаг 3 / 6 · применение</span>
+  </div>
+
+  <span class="tiny">Три кейса</span>
+  <!-- ↓ Заголовок -->
+  <div class="h2">Где именно<br>начинается ошибка</div>
+  <p style="font-size:14px;color:var(--muted);margin-bottom:20px">В каждом кейсе — задача и выбор действия. Разбор появится после ответа.</p>
+
+  <!-- ── КЕЙС 1 ─────────────────────────────────── -->
+  <div id="case1wrap">
+    <span class="case-tag">Кейс 1 / 3 · Проверка фактов вместо проверки рамки</span>
+    <p class="case-scenario">Вы попросили ИИ найти конкурентов вашей компании. В ответе есть:</p>
+    <ul class="case-scenario">
+      <li>список компаний</li>
+      <li>объём инвестиций</li>
+      <li>доля рынка</li>
+      <li>ссылки на источники</li>
+    </ul>
+    <p class="case-q-label">На что вы обратите внимание в первую очередь?</p>
+    <div class="bq-choices">
+      <button class="bq-btn" onclick="casePick(1,this,'figures')">Проверю цифры</button>
+      <button class="bq-btn" onclick="casePick(1,this,'exist')">Проверю существование компаний</button>
+      <button class="bq-btn" onclick="casePick(1,this,'sources')">Проверю источники</button>
+      <button class="bq-btn" onclick="casePick(1,this,'frame')">Проверю, кого ИИ посчитал конкурентом</button>
+    </div>
+    <div class="feedback" id="case1bd">
+      <span class="fb-label">Разбор</span>
+      <p>Большинство людей начинают с цифр или источников. Но ошибка может возникнуть раньше.</p>
+      <p>Если ИИ неправильно понял задачу и включил в список не конкурентов, а партнёров, соседние сегменты или зарубежные аналоги — все цифры могут быть абсолютно верными и при этом бесполезными.</p>
+      <p>Критическое мышление начинается не с проверки ответа. Оно начинается с проверки того, правильно ли поставлен вопрос.</p>
+    </div>
+  </div>
+
+  <!-- ── КЕЙС 2 (скрыт до ответа на кейс 1) ────── -->
+  <div class="case-sep" id="sep12"></div>
+  <div id="case2wrap" style="display:none">
+    <span class="case-tag">Кейс 2 / 3 · Проверка содержания вместо проверки отсутствующего</span>
+    <p class="case-scenario">Вы попросили ИИ подготовить обзор рынка. Ответ выглядит подробным:</p>
+    <ul class="case-scenario">
+      <li>перечислены тренды</li>
+      <li>названы лидеры рынка</li>
+      <li>приведены прогнозы на следующий год</li>
+    </ul>
+    <p class="case-q-label">Что вызовет у вас больше всего вопросов?</p>
+    <div class="bq-choices">
+      <button class="bq-btn" onclick="casePick(2,this,'figures2')">Насколько точны цифры</button>
+      <button class="bq-btn" onclick="casePick(2,this,'forecasts')">Откуда взяты прогнозы</button>
+      <button class="bq-btn" onclick="casePick(2,this,'missing')">Не пропущены ли важные игроки</button>
+      <button class="bq-btn" onclick="casePick(2,this,'logic')">Насколько убедительна аргументация</button>
+    </div>
+    <div class="feedback" id="case2bd">
+      <span class="fb-label">Разбор</span>
+      <p>Большинство людей ищут ошибки в том, что написано. Но серьёзные проблемы часто находятся в том, чего нет.</p>
+      <p>ИИ может уверенно описать рынок и при этом полностью проигнорировать сегмент, который занимает 30% рынка. Когда ответ выглядит полным, мы редко задаём вопрос: «Что здесь могло быть упущено?»</p>
+    </div>
+  </div>
+
+  <!-- ── КЕЙС 3 (скрыт до ответа на кейс 2) ────── -->
+  <div class="case-sep" id="sep23"></div>
+  <div id="case3wrap" style="display:none">
+    <span class="case-tag">Кейс 3 / 3 · Проверка ответа вместо проверки альтернатив</span>
+    <p class="case-scenario">Вы попросили ИИ предложить стратегию выхода на новый рынок. Ответ выглядит разумно и подробно. Что вы сделаете дальше?</p>
+    <div class="bq-choices">
+      <button class="bq-btn" onclick="casePick(3,this,'verify_facts')">Проверю ключевые факты</button>
+      <button class="bq-btn" onclick="casePick(3,this,'verify_sources')">Проверю источники</button>
+      <button class="bq-btn" onclick="casePick(3,this,'justify')">Попрошу ИИ обосновать выводы</button>
+      <button class="bq-btn" onclick="casePick(3,this,'alternative')">Попрошу предложить совершенно другую стратегию</button>
+    </div>
+    <div class="feedback" id="case3bd">
+      <span class="fb-label">Разбор</span>
+      <p>Большинство людей начинают проверять полученный ответ. Но тем самым они уже принимают его как основную версию реальности.</p>
+      <p>Часто более полезный вопрос: «Какие ещё варианты существуют?» Если рассматривать только одну гипотезу, можно очень тщательно проверить её детали — и всё равно упустить более сильное решение.</p>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn_s3" disabled onclick="next()">Дальше →</button>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════
+   ЭКРАН 3b · Переход к рефлексии
+   ↓ РЕДАКТИРОВАТЬ: текст свободно
+══════════════════════════════════════════════════ -->
+<section class="screen" id="s3b">
+  <div class="cycle-progress">
+    <div class="cp done"></div><div class="cp done"></div><div class="cp done"></div>
+    <div class="cp active"></div><div class="cp"></div><div class="cp"></div>
+    <span class="cycle-label">шаг 4 / 6 · рефлексия</span>
+  </div>
+
+  <span class="tiny">Перед тем как ответить</span>
+  <div class="h2">Что происходит<br>до проверки</div>
+
+  <!-- ↓ Переходный текст — редактируйте свободно -->
+  <div class="bridge-block">
+    <p>Попробуйте вспомнить свои реальные рабочие задачи.</p>
+    <p>Скорее всего, вы не принимаете ответы ИИ бездумно. Скорее всего, вы действительно многое проверяете. Вопрос в другом.</p>
+    <p>Что происходит <em>до того</em>, как проверка понадобилась?</p>
+    <p>Когда ответ уже получен, мозг естественным образом начинает работать внутри предложенной рамки. Он проверяет факты, ищет неточности, оценивает аргументы. Но гораздо реже задаётся вопросом: «А что, если сама рамка неверна?»</p>
+    <p style="margin-bottom:0">Именно в этот момент чаще всего и возникает автоматическое доверие.</p>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="next()">К рефлексии →</button>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════
+   ЭКРАН 4 · Рефлексия
+   ↓ РЕДАКТИРОВАТЬ: вопросы и подсказки
+══════════════════════════════════════════════════ -->
+<section class="screen" id="s4">
+  <div class="cycle-progress">
+    <div class="cp done"></div><div class="cp done"></div><div class="cp done"></div>
+    <div class="cp done"></div><div class="cp active"></div><div class="cp"></div>
+    <span class="cycle-label">шаг 5 / 6 · рефлексия</span>
+  </div>
+
+  <span class="tiny">Про себя</span>
+  <!-- ↓ Заголовок -->
+  <div class="h2">Три вопроса<br>про ваши паттерны</div>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Не про ИИ — про то, как вы с ним работаете. Пара слов достаточно.</p>
+
+  <!-- ↓ Вопросы рефлексии — редактируйте метки и подсказки -->
+  <div class="field-group">
+    <label class="field-label">Где вы чаще всего берёте первый ответ ИИ без дополнительных проверок?</label>
+    <textarea id="ref1" rows="2" placeholder="Черновики, справочные вопросы, рутинные задачи…" oninput="checkRefs()"></textarea>
+  </div>
+  <div class="field-group">
+    <label class="field-label">Что обычно служит для вас сигналом «достаточно, можно использовать»?</label>
+    <textarea id="ref2" rows="2" placeholder="Ответ звучит логично / нет времени / выглядит полно…" oninput="checkRefs()"></textarea>
+  </div>
+  <div class="field-group">
+    <label class="field-label">В каких задачах цена неточного ответа для вас особенно высока?</label>
+    <textarea id="ref3" rows="2" placeholder="Публичные материалы / решения с бюджетом / советы другим…" oninput="checkRefs()"></textarea>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn_s4" disabled onclick="populateAndNext()">Записать в артефакт →</button>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════
+   ЭКРАН 5 · Артефакт
+   ↓ РЕДАКТИРОВАТЬ: название артефакта, подписи полей
+══════════════════════════════════════════════════ -->
+<section class="screen" id="s5">
+  <div class="cycle-progress">
+    <div class="cp done"></div><div class="cp done"></div><div class="cp done"></div>
+    <div class="cp done"></div><div class="cp done"></div><div class="cp active"></div>
+    <span class="cycle-label">шаг 6 / 6 · артефакт</span>
+  </div>
+
+  <span class="tiny">Результат цикла</span>
+  <!-- ↓ Заголовок -->
+  <div class="h2">Ваша карта<br>сохранена</div>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:6px">Первая версия. В следующих модулях он будет уточняться.</p>
+
+  <!-- ↓ Артефакт — редактируйте название и подписи полей -->
+  <div class="artifact-wrap">
+    <div class="artifact-header">
+      <div class="artifact-title">Мои зоны риска</div>
+      <div class="artifact-meta">Модуль 00 · элемент 2 из 9</div>
+    </div>
+    <div class="af-row">
+      <div class="af-num">01</div>
+      <div>
+        <div class="af-label">Где я беру первый ответ без проверки</div>
+        <div class="af-value" id="af_ref1"></div>
+      </div>
+    </div>
+    <div class="af-row">
+      <div class="af-num">02</div>
+      <div>
+        <div class="af-label">Мой сигнал «достаточно»</div>
+        <div class="af-value" id="af_ref2"></div>
+      </div>
+    </div>
+    <div class="af-row">
+      <div class="af-num">03</div>
+      <div>
+        <div class="af-label">Где цена ошибки особенно высока</div>
+        <div class="af-value" id="af_ref3"></div>
+      </div>
+    </div>
+    <div class="af-row">
+      <div class="af-num">04</div>
+      <div>
+        <div class="af-label">Моя стратегия в ситуации с высокими ставками</div>
+        <div class="af-value decision" id="af_decision"></div>
+      </div>
+    </div>
+    <div class="af-row">
+      <div class="af-num">05</div>
+      <div>
+        <div class="af-label">Ситуация, где стратегию нужно пересмотреть</div>
+        <div class="af-value empty">— сформулируется в М3 —</div>
+      </div>
+    </div>
+    <div class="artifact-footer">Протокол растёт вместе с курсом · М2 → М3 → … → М9</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="next()">Итог модуля →</button>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════
+   ЭКРАН 6 · Итог модуля
+   ↓ РЕДАКТИРОВАТЬ: выводы, превью следующего модуля
+══════════════════════════════════════════════════ -->
+<section class="screen" id="s6">
+  <div class="step-header">
+    <div>
+      <div class="step-kicker">Модуль завершён</div>
+      <!-- ↓ Заголовок итога -->
+      <div class="h2" style="margin-bottom:0">Что осталось<br>после модуля</div>
+    </div>
+    <div class="step-num-big">00</div>
+  </div>
+
+  <!-- ↓ Ключевые выводы — редактируйте свободно -->
+  <div class="takeaway-block">
+    <p>Разрыв между декларируемой и фактической критичностью — не слабость. Это результат того, как мышление работает под нагрузкой: оно экономит ресурсы там, где может.</p>
+    <p>Критичность к ИИ — это не общая установка. Это конкретные действия в конкретных ситуациях. Большинство людей делают их реже, чем думают.</p>
+    <p>У вас теперь есть первый контур: где вы доверяете автоматически — и где цена этого наиболее высока.</p>
+  </div>
+
+  <!-- ↓ Превью следующего модуля — редактируйте название и описание -->
+  <div class="next-module">
+    <span class="next-label">Следующий · Модуль 01</span>
+    <div class="next-title">Как я спрашиваю: формулировка запроса и её последствия</div>
+    <div class="next-desc">Один и тот же вопрос — разные ответы. Разберём, как меняется результат в зависимости от того, как именно вы строите запрос.</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="goScreen('s0')">← К началу модуля</button>
+    <button class="btn btn-secondary" onclick="goScreen('s1')">Пройти снова</button>
+  </div>
+</section>
+
+</main>
+
+
+<script>
+// ══════════════════════════════════════════════════
+// НАВИГАЦИЯ
+// ══════════════════════════════════════════════════
+const SCREENS = ['s0','s1','s2','s3','s3b','s4','s5','s6'];
+const STAGE_LABELS = [
+  'Обложка',
+  'Шаг 1 · Диагностика',
+  'Шаг 2 · Теория',
+  'Шаг 3 · Применение',
+  '',
+  'Шаг 4 · Рефлексия',
+  'Шаг 5 · Артефакт',
+  'Итог'
+];
+
+let cur = 0;
+let selfRating = '';
+let step3answer = '';
+
+// Ответы на 6 поведенческих вопросов
+const behaviorAnswers = { q1: null, q2: null, q3: null, q4: null, q5: null, q6: null };
+
+function buildDots() {
+  const el = document.getElementById('pdots');
+  el.innerHTML = '';
+  SCREENS.forEach((id, i) => {
+    if (i > 0) {
+      const line = document.createElement('span');
+      line.className = 'pline';
+      el.appendChild(line);
+    }
+    const dot = document.createElement('span');
+    dot.className = 'pdot' + (i === cur ? ' active' : i < cur ? ' done' : '');
+    el.appendChild(dot);
+  });
+}
+
+function updateUI() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(SCREENS[cur]).classList.add('active');
+  buildDots();
+  document.getElementById('stageLabel').textContent = STAGE_LABELS[cur] || '';
+  document.getElementById('backBtn').classList.toggle('visible', cur > 0);
+  window.scrollTo(0, 0);
+}
+
+function next() {
+  if (cur < SCREENS.length - 1) { cur++; updateUI(); }
+}
+function prev() {
+  if (cur > 0) { cur--; updateUI(); }
+}
+function goScreen(id) {
+  const i = SCREENS.indexOf(id);
+  if (i >= 0) { cur = i; updateUI(); }
+}
+
+
+// ══════════════════════════════════════════════════
+// ЭКРАН 1 · ЧАСТЬ A — Самооценка
+// ↓ РЕДАКТИРОВАТЬ: тексты мини-фидбека
+// ══════════════════════════════════════════════════
+function ratingPick(btn, val) {
+  selfRating = val;
+  document.querySelectorAll('#ratingChoices .choice-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  // ↓ Мини-фидбек под самооценку (1-2 строки, открывает часть B)
+  const miniMap = {
+    high:       'Хорошо. Давайте проверим эту оценку на конкретных привычках.',
+    'med-high': 'Звучит разумно. Посмотрим, что стоит за этим на практике.',
+    med:        'Честная оценка. Посмотрим, что стоит за «иногда».',
+    low:        'Честная оценка — и хорошая отправная точка.'
+  };
+
+  const fb = document.getElementById('ratingFb');
+  fb.innerHTML = `<span class="fb-label">Зафиксировано</span><p style="margin:0">${miniMap[val]}</p>`;
+  fb.classList.add('show');
+
+  // Открываем часть B
+  document.getElementById('sectionB').classList.add('show');
+}
+
+
+// ══════════════════════════════════════════════════
+// ЭКРАН 1 · ЧАСТЬ B — 6 поведенческих вопросов + зеркало
+// ↓ РЕДАКТИРОВАТЬ: тексты зеркала в generateMirror()
+// ══════════════════════════════════════════════════
+
+function qPick(q, btn, val) {
+  behaviorAnswers[q] = val;
+  const group = btn.closest('.bq-choices');
+  group.querySelectorAll('.bq-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  // Проверяем, все ли 6 вопросов отвечены
+  const allAnswered = Object.values(behaviorAnswers).every(v => v !== null);
+  if (allAnswered) {
+    generateMirror();
+    document.getElementById('btn_s1').disabled = false;
+  }
+}
+
+// ↓ Генерирует зеркало на основе самооценки и 6 ответов
+function generateMirror() {
+  const selfLabels = {
+    high:       'достаточно критичного пользователя',
+    'med-high': 'скорее критичного пользователя',
+    med:        'пользователя с умеренным уровнем критичности',
+    low:        'пользователя, который доверяет ИИ интуитивно'
+  };
+
+  // Определяем «слабые» паттерны по каждому вопросу
+  const patterns = [];
+
+  if (behaviorAnswers.q1 === 'many' || behaviorAnswers.q1 === 'always')
+    patterns.push('работаете преимущественно с первым ответом — альтернативы запрашиваются редко');
+  if (behaviorAnswers.q2 === 'never' || behaviorAnswers.q2 === 'few')
+    patterns.push('редко проверяете цифры и факты в других источниках');
+  if (behaviorAnswers.q3 === 'never' || behaviorAnswers.q3 === 'once')
+    patterns.push('редко запрашиваете альтернативное решение той же задачи');
+  if (behaviorAnswers.q4 === 'never' || behaviorAnswers.q4 === 'once')
+    patterns.push('редко обращаетесь к дополнительным источникам для проверки');
+  if (behaviorAnswers.q5 === 'never' || behaviorAnswers.q5 === 'once')
+    patterns.push('редко просите ИИ объяснить логику или предположения, на которых строится ответ');
+  if (behaviorAnswers.q6 === 'never' || behaviorAnswers.q6 === 'once')
+    patterns.push('практически не отказываетесь от рекомендаций ИИ');
+
+  const highSelf = (selfRating === 'high' || selfRating === 'med-high');
+  const mirror = document.getElementById('mirrorBlock');
+  let html = '';
+
+  if (patterns.length === 0) {
+    html = `<span class="fb-label">Высокий уровень вовлечённости</span>
+      <p>За последние 2–3 дня вы активно работали с ответами ИИ: проверяли, запрашивали альтернативы, обращались к другим источникам. Это редкость.</p>
+      <p>Один вопрос: это устойчивая практика по всем задачам — или только по самым важным? Именно там, где проверка происходит реже, обычно скрывается самое интересное.</p>`;
+  } else if (patterns.length <= 2 && !highSelf) {
+    const bullets = patterns.map(p => `<li>${p}</li>`).join('');
+    html = `<span class="fb-label">Смешанная картина</span>
+      <p>По большинству показателей у вас есть система. Реже всего за эти дни:</p>
+      <ul class="mirror-bullets">${bullets}</ul>
+      <p>Это не критика — это точка для развития. Теория объяснит, почему именно здесь мышление «экономит» в первую очередь.</p>`;
+  } else if (highSelf && patterns.length >= 3) {
+    const bullets = patterns.map(p => `<li>${p}</li>`).join('');
+    html = `<span class="fb-label">Вот ваша картина</span>
+      <p>Вы оценили себя как <strong>${selfLabels[selfRating]}</strong>. При этом за последние 2–3 дня:</p>
+      <ul class="mirror-bullets">${bullets}</ul>
+      <p>Это не означает, что вы используете ИИ неправильно. Но показывает: значительная часть доверия возникает автоматически — без явного решения.</p>`;
+  } else {
+    const bullets = patterns.map(p => `<li>${p}</li>`).join('');
+    html = `<span class="fb-label">Честная картина</span>
+      <p>За последние 2–3 дня:</p>
+      <ul class="mirror-bullets">${bullets}</ul>
+      <p>Это нормально — мозг работает именно так под реальной нагрузкой. Теория объяснит механизм и покажет, как выстроить систему, которая работает в реальных условиях.</p>`;
+  }
+
+  mirror.innerHTML = html;
+  mirror.classList.add('show');
+  setTimeout(() => mirror.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+}
+
+
+// ══════════════════════════════════════════════════
+// ЭКРАН 3 · Три кейса с последовательным раскрытием
+// ↓ РЕДАКТИРОВАТЬ: логику разбора в casePick()
+// ══════════════════════════════════════════════════
+
+// Используется для артефакта (поле 04) — на основе выбора в кейсе 3
+const decisionLabels = {
+  verify_facts:   'Проверяю ключевые факты в ответе',
+  verify_sources: 'Проверяю источники',
+  justify:        'Прошу ИИ обосновать выводы',
+  alternative:    'Запрашиваю альтернативный вариант'
+};
+
+function casePick(num, btn, val) {
+  if (num === 3) step3answer = val; // для артефакта
+
+  const choices = btn.closest('.bq-choices');
+  choices.querySelectorAll('.bq-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  // Показываем разбор текущего кейса
+  document.getElementById('case' + num + 'bd').classList.add('show');
+
+  // Открываем следующий кейс или активируем кнопку
+  if (num === 1) {
+    document.getElementById('sep12').classList.add('show');
+    const next2 = document.getElementById('case2wrap');
+    next2.style.display = 'block';
+    next2.style.animation = 'fadeUp .4s ease';
+    setTimeout(() => next2.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 350);
+  } else if (num === 2) {
+    document.getElementById('sep23').classList.add('show');
+    const next3 = document.getElementById('case3wrap');
+    next3.style.display = 'block';
+    next3.style.animation = 'fadeUp .4s ease';
+    setTimeout(() => next3.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 350);
+  } else if (num === 3) {
+    document.getElementById('btn_s3').disabled = false;
+    setTimeout(() => document.getElementById('btn_s3').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 500);
+  }
+}
+
+
+// ══════════════════════════════════════════════════
+// ЭКРАН 4 · Рефлексия — активация кнопки
+// ══════════════════════════════════════════════════
+function checkRefs() {
+  const v1 = document.getElementById('ref1').value.trim();
+  const v2 = document.getElementById('ref2').value.trim();
+  const v3 = document.getElementById('ref3').value.trim();
+  document.getElementById('btn_s4').disabled = !(v1 && v2 && v3);
+}
+
+
+// ══════════════════════════════════════════════════
+// ЭКРАН 5 · Артефакт — заполнение из рефлексии
+// ══════════════════════════════════════════════════
+function populateAndNext() {
+  document.getElementById('af_ref1').textContent = document.getElementById('ref1').value.trim();
+  document.getElementById('af_ref2').textContent = document.getElementById('ref2').value.trim();
+  document.getElementById('af_ref3').textContent = document.getElementById('ref3').value.trim();
+  document.getElementById('af_decision').textContent = decisionLabels[step3answer] || '—';
+  next();
+}
+
+// ── Инициализация ──
+updateUI();
+</script>
+</body>
+</html>

@@ -919,6 +919,64 @@ function populateAndNext() {
 
 // ── Инициализация ──
 updateUI();
+// ══════════════════════════════════════════════════
+// АНАЛИТИКА МОДУЛЯ 00 — GOOGLE SHEETS
+// ══════════════════════════════════════════════════
+
+const ANALYTICS_URL =
+  'https://script.google.com/macros/s/AKfycbypzIaFYtulcOVeIbI1Zo1Wxd64RTQxzHvQ_dpNrhU2sqGt8EgL-0NCDA0Kpkd69MRu/exec';
+
+// Уникальный ID текущего прохождения
+const participantId = crypto.randomUUID();
+
+// Время открытия модуля
+const moduleStartTime = Date.now();
+
+// Согласие на сбор данных
+let analyticsConsent = false;
+
+// Отправка события в Google Sheets
+function trackEvent(event, question = '', answer = '', screen = '') {
+  if (!analyticsConsent) return;
+
+  const payload = {
+    participant_id: participantId,
+    event: event,
+    question: question,
+    answer: answer,
+    screen: screen,
+    elapsed_seconds: Math.round(
+      (Date.now() - moduleStartTime) / 1000
+    )
+  };
+
+  fetch(ANALYTICS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8'
+    },
+    body: JSON.stringify(payload),
+    keepalive: true
+  }).catch(error => {
+    console.warn('Analytics error:', error);
+  });
+}
+
+// Запрос согласия перед началом модуля
+function requestAnalyticsConsent() {
+  analyticsConsent = window.confirm(
+    'Разрешаете анонимно сохранять ваши ответы ' +
+    'и данные о прохождении модуля для оценки ' +
+    'качества обучения?\n\n' +
+    'Данные будут доступны автору курса. ' +
+    'Вопросы рефлексии могут содержать введённый вами текст.\n\n' +
+    'Нажмите ОК, чтобы согласиться, ' +
+    'или Отмена, чтобы пройти модуль без сбора данных.'
+  );
+
+  trackEvent('module_start', '', '', 's0');
+}
 </script>
 </body>
 </html>

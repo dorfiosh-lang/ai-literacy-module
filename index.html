@@ -292,16 +292,26 @@ textarea:focus { border-bottom-color: var(--text); }
   <!-- ЧАСТЬ A · Самооценка -->
   <span class="tiny">Начнём с самооценки</span>
   <!-- ↓ Вопрос А -->
-  <div class="h2">Как вы подходите<br>к ответам ИИ?</div>
-  <p style="color:var(--muted);font-size:14px;margin-bottom:4px">Выберите описание, которое вам ближе всего.</p>
+  <div class="h2">Насколько тщательно<br>вы проверяете ответы ИИ?</div>
 
-  <!-- ↓ Варианты самооценки -->
-  <div class="choice-group" id="ratingChoices">
-    <button class="choice-btn" onclick="ratingPick(this,'high')">Проверяю тщательно: факты, источники, альтернативы</button>
-    <button class="choice-btn" onclick="ratingPick(this,'med-high')">Проверяю, когда что-то кажется неточным или важным</button>
-    <button class="choice-btn" onclick="ratingPick(this,'med')">Доверяю большинству — иногда перепроверяю</button>
-    <button class="choice-btn" onclick="ratingPick(this,'low')">Использую ответы практически как есть</button>
-  </div>
+<p style="color:var(--muted);font-size:14px;margin-bottom:4px">
+
+  Выберите описание, которое лучше всего соответствует вашему представлению о собственных привычках.
+</p>
+<div class="choice-group" id="ratingChoices">
+  <button class="choice-btn" onclick="ratingPick(this,'high')">
+    Очень тщательно. Обычно мне удаётся заметить основные проблемы и ограничения ответа.
+  </button>
+  <button class="choice-btn" onclick="ratingPick(this,'med-high')">
+    Скорее тщательно. Проверяю важные моменты, хотя могу что-то упустить.
+  </button>
+  <button class="choice-btn" onclick="ratingPick(this,'med')">
+    Частично. Проверяю отдельные аспекты, но не всегда понимаю, чего ещё может не хватать.
+  </button>
+  <button class="choice-btn" onclick="ratingPick(this,'low')">
+    Минимально. Обычно ориентируюсь на то, насколько ответ выглядит убедительным.
+  </button>
+</div>
 
   <!-- Мини-фидбек после выбора A — открывает часть B -->
   <div class="feedback" id="ratingFb"></div>

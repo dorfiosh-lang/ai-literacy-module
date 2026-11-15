@@ -272,7 +272,7 @@ textarea:focus { border-bottom-color: var(--text); }
     </ul>
   </div>
   <div class="btn-row">
-    <button class="btn btn-primary" onclick="next()">Начать модуль</button>
+    <button class="btn btn-primary" onclick="requestAnalyticsConsent(); next()">Начать модуль</button>
   </div>
 </section>
 
@@ -754,6 +754,7 @@ function goScreen(id) {
 // ══════════════════════════════════════════════════
 function ratingPick(btn, val) {
   selfRating = val;
+  trackEvent('self_rating', 'self_rating', val, 's1');
   document.querySelectorAll('#ratingChoices .choice-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
 

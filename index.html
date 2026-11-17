@@ -221,6 +221,32 @@ textarea:focus { border-bottom-color: var(--text); }
 .bridge-block { background: var(--paper); border: 1px solid var(--gray-soft); padding: 24px 26px; margin: 18px 0; }
 .bridge-block p { font-size: 15px; line-height: 1.78; margin-bottom: 12px; color: var(--text); }
 .bridge-block p:last-child { margin-bottom: 0; }
+/* ── Темы (множественный выбор) ── */
+.topic-list { margin: 4px 0 6px; }
+.topic-item {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 16px 0; border-bottom: 1px solid var(--gray-soft);
+  cursor: pointer; transition: all .15s;
+}
+.topic-item:last-child { border-bottom: none; }
+.topic-item:hover .topic-title { color: var(--amber); }
+.topic-check {
+  width: 16px; height: 16px; border: 1px solid var(--gray);
+  flex-shrink: 0; margin-top: 3px; position: relative; transition: all .18s;
+}
+.topic-item.selected .topic-check { background: var(--amber); border-color: var(--amber); }
+.topic-item.selected .topic-check::after {
+  content: ''; position: absolute; left: 4px; top: 1px;
+  width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.topic-title { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 4px; line-height: 1.4; }
+.topic-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+.topic-other-field {
+  width: 100%; margin-top: 10px; display: none;
+}
+.topic-other-field.show { display: block; }
+
 /* ── Адаптив ── */
 @media (max-width: 640px) {
   main { padding: 80px 18px 50px; }
@@ -267,7 +293,7 @@ textarea:focus { border-bottom-color: var(--text); }
     <ul class="what-list">
       <li>Оцените свой уровень критичности</li>
       <li>Узнаете, почему мозг часто останавливается раньше, чем нужно</li>
-      <li>Разберете реальные кейсы ю</li>
+      <li>Разберете реальные кейсы</li>
       <li>Распознаете свои зоны риска</li>
     </ul>
   </div>
@@ -349,7 +375,7 @@ textarea:focus { border-bottom-color: var(--text); }
     <!-- ↓ Q3 -->
     <div class="bq">
       <span class="bq-num">вопрос 3 / 6</span>
-      <p class="bq-text">Сколько раз вы пропускали тщательнуюпроверку из-за нехватки времени?</p>
+      <p class="bq-text">Сколько раз вы пропускали тщательную проверку из-за нехватки времени?</p>
       <div class="bq-choices">
         <button class="bq-btn" onclick="qPick('q3',this,'never')">Ни разу</button>
         <button class="bq-btn" onclick="qPick('q3',this,'once')">1 раз</button>
@@ -700,6 +726,73 @@ textarea:focus { border-bottom-color: var(--text); }
 
 
 <!-- ══════════════════════════════════════════════════
+   ЭКРАН ТЕМЫ · Интерес к продолжению курса (demand-тест)
+   ↓ РЕДАКТИРОВАТЬ: темы и описания свободно, можно добавлять/убирать пункты
+   Множественный выбор, ответ не обязателен — пустой выбор тоже сигнал.
+══════════════════════════════════════════════════ -->
+<section class="screen" id="stopics">
+  <span class="tiny">Если будет продолжение</span>
+  <div class="h2">О чём вам было бы<br>интересно узнать подробнее?</div>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:22px">Выберите одну или несколько тем, которые вас заинтересовали.</p>
+
+  <div class="topic-list" id="topicList">
+    <div class="topic-item" data-topic="self_deception" onclick="toggleTopic(this)">
+      <div class="topic-check"></div>
+      <div>
+        <div class="topic-title">Может ли ИИ незаметно укреплять наши заблуждения?</div>
+        <div class="topic-desc">Почему обращение к нейросети за объективной оценкой не всегда помогает проверить собственные убеждения.</div>
+      </div>
+    </div>
+
+    <div class="topic-item" data-topic="convincing_wrong" onclick="toggleTopic(this)">
+      <div class="topic-check"></div>
+      <div>
+        <div class="topic-title">Почему убедительный ответ ИИ иногда опаснее очевидной ошибки</div>
+        <div class="topic-desc">Как нейросеть может опираться на достоверные факты, но приводить нас к неверным выводам.</div>
+      </div>
+    </div>
+
+    <div class="topic-item" data-topic="hidden_influence" onclick="toggleTopic(this)">
+      <div class="topic-check"></div>
+      <div>
+        <div class="topic-title">Как ИИ незаметно влияет на наши решения</div>
+        <div class="topic-desc">Почему мы можем считать свой выбор самостоятельным, даже когда все варианты нам предложила нейросеть.</div>
+      </div>
+    </div>
+
+    <div class="topic-item" data-topic="seeking_reassurance" onclick="toggleTopic(this)">
+      <div class="topic-check"></div>
+      <div>
+        <div class="topic-title">Почему мы обращаемся к ИИ, даже когда нам не нужен ответ</div>
+        <div class="topic-desc">Как сомнения, тревога и желание получить подтверждение влияют на наши привычки.</div>
+      </div>
+    </div>
+
+    <div class="topic-item" data-topic="thinking_habits" onclick="toggleTopic(this)">
+      <div class="topic-check"></div>
+      <div>
+        <div class="topic-title">Как ИИ меняет наш процесс мышления</div>
+        <div class="topic-desc">Почему быстрые и удобные ответы могут снижать нашу вовлечённость в решение задач и мешать замечать ошибки.</div>
+      </div>
+    </div>
+
+    <div class="topic-item" data-topic="other" id="topicOtherItem" onclick="toggleTopic(this)">
+      <div class="topic-check"></div>
+      <div style="width:100%">
+        <div class="topic-title">Другое</div>
+        <div class="topic-desc">Напишите свою тему — это ценно само по себе.</div>
+        <textarea class="topic-other-field" id="topicOtherText" rows="2" placeholder="Какая тема?" onclick="event.stopPropagation()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="submitTopics()">Дальше →</button>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════
    ЭКРАН 6 · Итог модуля
    ↓ РЕДАКТИРОВАТЬ: выводы, превью следующего модуля
 ══════════════════════════════════════════════════ -->
@@ -740,7 +833,7 @@ textarea:focus { border-bottom-color: var(--text); }
 // ══════════════════════════════════════════════════
 // НАВИГАЦИЯ
 // ══════════════════════════════════════════════════
-const SCREENS = ['s0','s1','s2','s3','s3b','s4','s4post','s5','sux','s6'];
+const SCREENS = ['s0','s1','s2','s3','s3b','s4','s4post','s5','sux','stopics','s6'];
 const STAGE_LABELS = [
   'Обложка',
   'Шаг 1 · Диагностика',
@@ -750,6 +843,7 @@ const STAGE_LABELS = [
   'Шаг 4 · Рефлексия',
   'Повторная самооценка',
   'Шаг 5 · Артефакт',
+  '',
   '',
   'Итог'
 ];
@@ -895,7 +989,7 @@ function generateMirror() {
     html = `<span class="fb-label">Вот ваша картина</span>
       <p>Вы оценили себя как <strong>${selfLabels[selfRating]}</strong>. При этом за последние 2–3 дня:</p>
       <ul class="mirror-bullets">${bullets}</ul>
-      <p>Это не ошибка — просто доверие здесь включается само, без осознанного решения.</p>`;
+      <p>Это не ошибка, просто доверие здесь включается само, без осознанного решения.</p>`;
   } else {
     const bullets = patterns.map(p => `<li>${p}</li>`).join('');
     html = `<span class="fb-label">Честная картина</span>
@@ -994,6 +1088,35 @@ function ratingPickAfter(btn, val) {
 function submitUx() {
   const val = document.getElementById('uxFeedback').value.trim();
   trackEvent('ux_feedback', 'ux_friction', val, 'sux');
+  next();
+}
+
+// ══════════════════════════════════════════════════
+// ЭКРАН ТЕМЫ · Интерес к продолжению курса — множественный выбор
+// ══════════════════════════════════════════════════
+const selectedTopics = new Set();
+
+function toggleTopic(el) {
+  const topic = el.dataset.topic;
+  const isSelected = el.classList.toggle('selected');
+
+  if (topic === 'other') {
+    const field = document.getElementById('topicOtherText');
+    field.classList.toggle('show', isSelected);
+    if (isSelected) field.focus();
+    else field.value = '';
+  }
+
+  if (isSelected) selectedTopics.add(topic);
+  else selectedTopics.delete(topic);
+}
+
+function submitTopics() {
+  trackEvent('topic_interest', 'topics_selected', Array.from(selectedTopics).join(', '), 'stopics');
+  if (selectedTopics.has('other')) {
+    const otherText = document.getElementById('topicOtherText').value.trim();
+    if (otherText) trackEvent('topic_interest', 'topic_other_text', otherText, 'stopics');
+  }
   next();
 }
 

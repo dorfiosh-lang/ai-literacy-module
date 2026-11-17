@@ -26,7 +26,7 @@
   --muted: #9A9590;
   --amber: #E85D3A;
   --amber-pale: #FEF0EC;
-  --dark-bg: #3A3530;
+  --dark-bg: #3A35;
   --dark-text: #F5F2EE;
   --orange-light: #FAC5B4;
   --display: 'Manrope', sans-serif;
@@ -36,7 +36,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
   background: var(--bg); color: var(--text); font-family: var(--sans);
-  font-weight: 300; font-size: 16px; line-height: 1.65;
+  font-weight: 0; font-size: 16px; line-height: 1.65;
   min-height: 100vh; -webkit-font-smoothing: antialiased; letter-spacing: .01em;
 }
 /* ── Прогресс и навигация ── */
@@ -81,7 +81,7 @@ main { min-height: 100vh; display: flex; align-items: center; justify-content: c
 .label { font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 20px; }
 .h1 { font-family: var(--display); font-weight: 800; font-size: clamp(44px, 8vw, 72px); line-height: .96; letter-spacing: -.05em; color: var(--ink); margin-bottom: 26px; }
 .h2 { font-family: var(--display); font-weight: 700; font-size: clamp(24px, 4vw, 38px); line-height: 1.06; letter-spacing: -.03em; color: var(--ink); margin-bottom: 20px; }
-.lead { font-size: 18px; line-height: 1.72; font-weight: 300; margin-bottom: 18px; }
+.lead { font-size: 18px; line-height: 1.72; font-weight: 0; margin-bottom: 18px; }
 p { margin-bottom: 14px; line-height: 1.72; }
 .small { font-size: 13px; color: var(--muted); line-height: 1.6; }
 .tiny { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: block; }
@@ -137,7 +137,7 @@ p { margin-bottom: 14px; line-height: 1.72; }
 .theory-block p:last-child { margin-bottom: 0; }
 .theory-block strong { font-weight: 500; color: var(--ink); }
 /* ── Пулл-цитата ── */
-.pull-quote { font-family: var(--sans); font-size: clamp(16px, 2.6vw, 21px); font-weight: 300; font-style: italic; line-height: 1.46; border-left: 2px solid var(--amber); padding-left: 20px; margin: 24px 0; color: var(--text); }
+.pull-quote { font-family: var(--sans); font-size: clamp(16px, 2.6vw, 21px); font-weight: 0; font-style: italic; line-height: 1.46; border-left: 2px solid var(--amber); padding-left: 20px; margin: 24px 0; color: var(--text); }
 /* ── Концепт-пилюли ── */
 .concept-pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 6px; }
 .concept-pill { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; background: var(--paper); border: 1px solid var(--gray-soft); color: var(--muted); padding: 4px 10px; }
@@ -276,7 +276,7 @@ textarea:focus { border-bottom-color: var(--text); }
   <p style="color:var(--muted);font-size:15px;line-height:1.75">Но так ли это на самом деле? В реальных задачах, с горящими дедлайнами, когда думать особо некогда.</p>
   <!-- ↓ Метаданные -->
   <div class="module-meta">
-    <div class="module-meta-item"><div class="module-meta-dot"></div>~30 минут</div>
+    <div class="module-meta-item"><div class="module-meta-dot"></div>~5 минут</div>
     <div class="module-meta-item"><div class="module-meta-dot"></div>1 диагностика</div>
     <div class="module-meta-item"><div class="module-meta-dot"></div>1 кейс</div>
     <div class="module-meta-item"><div class="module-meta-dot"></div>1 артефакт</div>

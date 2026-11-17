@@ -159,12 +159,6 @@ textarea:focus { border-bottom-color: var(--text); }
 .af-value.decision { color: var(--amber); font-weight: 500; }
 .af-value.empty { color: var(--gray); font-style: italic; }
 .artifact-footer { text-align: center; font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding-top: 16px; border-top: 1px solid var(--gray-soft); margin-top: 16px; }
-/* ── Прогресс внутри модуля ── */
-.cycle-progress { display: flex; gap: 5px; margin-bottom: 20px; align-items: center; }
-.cp { width: 24px; height: 2px; background: var(--gray-soft); }
-.cp.done { background: var(--amber); opacity: .5; }
-.cp.active { background: var(--amber); }
-.cycle-label { font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-left: 8px; }
 /* ── Шапка экрана ── */
 .step-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 26px; padding-bottom: 16px; border-bottom: 1px solid var(--gray-soft); }
 .step-kicker { font-family: var(--mono); font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: var(--amber); margin-bottom: 4px; }
@@ -309,12 +303,6 @@ textarea:focus { border-bottom-color: var(--text); }
    ↓ РЕДАКТИРОВАТЬ: вопросы, варианты, фидбек в JS
 ══════════════════════════════════════════════════ -->
 <section class="screen" id="s1">
-  <div class="cycle-progress">
-    <div class="cp active"></div><div class="cp"></div><div class="cp"></div>
-    <div class="cp"></div><div class="cp"></div><div class="cp"></div>
-    <span class="cycle-label">шаг 1 / 6 | диагностика</span>
-  </div>
-
   <!-- ЧАСТЬ A | Самооценка -->
   <span class="tiny">Начнём с самооценки</span>
   <!-- ↓ Вопрос А -->
@@ -435,12 +423,6 @@ textarea:focus { border-bottom-color: var(--text); }
    ↓ РЕДАКТИРОВАТЬ: параграфы, пулл-цитату, концепты
 ══════════════════════════════════════════════════ -->
 <section class="screen" id="s2">
-  <div class="cycle-progress">
-    <div class="cp done"></div><div class="cp active"></div><div class="cp"></div>
-    <div class="cp"></div><div class="cp"></div><div class="cp"></div>
-    <span class="cycle-label">шаг 2 / 6 | теория</span>
-  </div>
-
   <span class="tiny">Короткая теория</span>
   <div class="h2">Почему<br>так происходит</div>
 
@@ -473,12 +455,6 @@ textarea:focus { border-bottom-color: var(--text); }
    ↓ РЕДАКТИРОВАТЬ: тексты кейсов и разборов
 ══════════════════════════════════════════════════ -->
 <section class="screen" id="s3">
-  <div class="cycle-progress">
-    <div class="cp done"></div><div class="cp done"></div><div class="cp active"></div>
-    <div class="cp"></div><div class="cp"></div><div class="cp"></div>
-    <span class="cycle-label">шаг 3 / 6 | применение</span>
-  </div>
-
   <span class="tiny">Три кейса</span>
   <!-- ↓ Заголовок -->
   <div class="h2">Где именно<br> впервые появляется ошибка</div>
@@ -562,12 +538,6 @@ textarea:focus { border-bottom-color: var(--text); }
    ↓ РЕДАКТИРОВАТЬ: текст свободно
 ══════════════════════════════════════════════════ -->
 <section class="screen" id="s3b">
-  <div class="cycle-progress">
-    <div class="cp done"></div><div class="cp done"></div><div class="cp done"></div>
-    <div class="cp active"></div><div class="cp"></div><div class="cp"></div>
-    <span class="cycle-label">шаг 4 / 6 | рефлексия</span>
-  </div>
-
   <span class="tiny">Перед тем как ответить</span>
   <div class="h2">Что происходит<br>до проверки</div>
 
@@ -591,12 +561,6 @@ textarea:focus { border-bottom-color: var(--text); }
    ↓ РЕДАКТИРОВАТЬ: вопросы и подсказки
 ══════════════════════════════════════════════════ -->
 <section class="screen" id="s4">
-  <div class="cycle-progress">
-    <div class="cp done"></div><div class="cp done"></div><div class="cp done"></div>
-    <div class="cp done"></div><div class="cp active"></div><div class="cp"></div>
-    <span class="cycle-label">шаг 5 / 6 | рефлексия</span>
-  </div>
-
   <span class="tiny">Про себя</span>
   <!-- ↓ Заголовок -->
   <div class="h2">Три вопроса<br>про ваши паттерны</div>
@@ -642,12 +606,6 @@ textarea:focus { border-bottom-color: var(--text); }
 </section>
 
 <section class="screen" id="s5">
-  <div class="cycle-progress">
-    <div class="cp done"></div><div class="cp done"></div><div class="cp done"></div>
-    <div class="cp done"></div><div class="cp done"></div><div class="cp active"></div>
-    <span class="cycle-label">шаг 6 / 6 | артефакт</span>
-  </div>
-
   <span class="tiny">Результат цикла</span>
   <!-- ↓ Заголовок -->
   <div class="h2">Ваша карта<br>сохранена</div>
@@ -834,19 +792,62 @@ textarea:focus { border-bottom-color: var(--text); }
 // НАВИГАЦИЯ
 // ══════════════════════════════════════════════════
 const SCREENS = ['s0','s1','s2','s3','s3b','s4','s4post','s5','sux','stopics','s6'];
-const STAGE_LABELS = [
-  'Обложка',
-  'Шаг 1 · Диагностика',
-  'Шаг 2 · Теория',
-  'Шаг 3 · Применение',
-  '',
-  'Шаг 4 · Рефлексия',
+
+// ══════════════════════════════════════════════════
+// ПРОГРЕСС · Сопоставление HTML-экранов с 6 учебными этапами
+// Верхний индикатор точек отображает эти 6 этапов, а не 11 HTML-экранов.
+// Эта структура — отдельная от SCREENS и не меняет её порядок/логику.
+// ↓ РЕДАКТИРОВАТЬ: названия этапов можно менять здесь
+// ══════════════════════════════════════════════════
+const TOTAL_STAGES = 6;
+
+const STAGE_NAMES = [
+  'Диагностика',
+  'Теория',
+  'Применение',
+  'Рефлексия',
   'Повторная самооценка',
-  'Шаг 5 · Артефакт',
-  '',
-  '',
-  'Итог'
+  'Мои зоны риска'
 ];
+
+// Какому учебному этапу (1–6) соответствует каждый экран.
+// s3b и s4 намеренно указывают на один и тот же этап (4) —
+// активная точка между ними не меняется.
+// s0 / sux / stopics / s6 — особые случаи, обрабатываются в getProgressState().
+const SCREEN_STAGE = {
+  s1: 1,
+  s2: 2,
+  s3: 3,
+  s3b: 4,
+  s4: 4,
+  s4post: 5,
+  s5: 6
+};
+
+// Возвращает состояние индикатора прогресса для текущего экрана:
+// activeStage — номер активного этапа (0, если модуль ещё не начат),
+// label — подпись под точками,
+// allDone — все шесть точек показываются как завершённые (активной нет).
+function getProgressState(screenId) {
+  if (screenId === 's0') {
+    return { activeStage: 0, label: 'Модуль 00 · Начало', allDone: false };
+  }
+  if (screenId === 'sux') {
+    return { activeStage: TOTAL_STAGES, label: 'Модуль пройден · Обратная связь', allDone: true };
+  }
+  if (screenId === 'stopics') {
+    return { activeStage: TOTAL_STAGES, label: 'Модуль пройден · Интерес к продолжению', allDone: true };
+  }
+  if (screenId === 's6') {
+    return { activeStage: TOTAL_STAGES, label: 'Модуль завершён', allDone: true };
+  }
+  const stage = SCREEN_STAGE[screenId] || 1;
+  return {
+    activeStage: stage,
+    label: `Шаг ${stage}/${TOTAL_STAGES} · ${STAGE_NAMES[stage - 1]}`,
+    allDone: false
+  };
+}
 
 let cur = 0;
 let selfRating = '';
@@ -857,33 +858,42 @@ let step3answer = '';
 // Ответы на 6 поведенческих вопросов
 const behaviorAnswers = { q1: null, q2: null, q3: null, q4: null, q5: null, q6: null };
 
-function buildDots() {
+// Строит верхний индикатор: всегда 6 точек, независимо от числа HTML-экранов.
+function buildDots(state) {
   const el = document.getElementById('pdots');
   el.innerHTML = '';
-  SCREENS.forEach((id, i) => {
-    if (i > 0) {
+  for (let i = 1; i <= TOTAL_STAGES; i++) {
+    if (i > 1) {
       const line = document.createElement('span');
       line.className = 'pline';
       el.appendChild(line);
     }
     const dot = document.createElement('span');
-    dot.className = 'pdot' + (i === cur ? ' active' : i < cur ? ' done' : '');
+    let cls = 'pdot';
+    if (state.allDone || i < state.activeStage) {
+      cls += ' done';
+    } else if (i === state.activeStage) {
+      cls += ' active';
+    }
+    dot.className = cls;
     el.appendChild(dot);
-  });
+  }
 }
 
 function updateUI() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(SCREENS[cur]).classList.add('active');
-  buildDots();
-  document.getElementById('stageLabel').textContent = STAGE_LABELS[cur] || '';
+  const screenId = SCREENS[cur];
+  document.getElementById(screenId).classList.add('active');
+  const state = getProgressState(screenId);
+  buildDots(state);
+  document.getElementById('stageLabel').textContent = state.label;
   document.getElementById('backBtn').classList.toggle('visible', cur > 0);
   window.scrollTo(0, 0);
-  if (SCREENS[cur] === 's6' && !completedTracked) {
+  if (screenId === 's6' && !completedTracked) {
     completedTracked = true;
     trackEvent('module_complete', '', '', 's6');
   }
-  trackEvent('screen_view', SCREENS[cur], '', SCREENS[cur]);
+  trackEvent('screen_view', screenId, '', screenId);
 }
 
 function next() {

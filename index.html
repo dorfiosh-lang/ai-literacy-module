@@ -286,10 +286,10 @@ textarea:focus { border-bottom-color: var(--text); }
   <div class="cycle-progress">
     <div class="cp active"></div><div class="cp"></div><div class="cp"></div>
     <div class="cp"></div><div class="cp"></div><div class="cp"></div>
-    <span class="cycle-label">шаг 1 / 6 · диагностика</span>
+    <span class="cycle-label">шаг 1 / 6 | диагностика</span>
   </div>
 
-  <!-- ЧАСТЬ A · Самооценка -->
+  <!-- ЧАСТЬ A | Самооценка -->
   <span class="tiny">Начнём с самооценки</span>
   <!-- ↓ Вопрос А -->
   <div class="h2">Насколько тщательно<br>вы проверяете ответы ИИ?</div>
@@ -316,7 +316,7 @@ textarea:focus { border-bottom-color: var(--text); }
   <!-- Мини-фидбек после выбора A — открывает часть B -->
   <div class="feedback" id="ratingFb"></div>
 
-  <!-- ЧАСТЬ B · Поведенческая диагностика (скрыта до выбора A) -->
+  <!-- ЧАСТЬ B | Поведенческая диагностика (скрыта до выбора A) -->
   <div class="section-b" id="sectionB">
     <span class="section-b-label">Теперь конкретнее — последние 2–3 дня</span>
     <!-- ↓ Фреймирующая инструкция -->
@@ -412,7 +412,7 @@ textarea:focus { border-bottom-color: var(--text); }
   <div class="cycle-progress">
     <div class="cp done"></div><div class="cp active"></div><div class="cp"></div>
     <div class="cp"></div><div class="cp"></div><div class="cp"></div>
-    <span class="cycle-label">шаг 2 / 6 · теория</span>
+    <span class="cycle-label">шаг 2 / 6 | теория</span>
   </div>
 
   <span class="tiny">Короткая теория</span>
@@ -450,7 +450,7 @@ textarea:focus { border-bottom-color: var(--text); }
   <div class="cycle-progress">
     <div class="cp done"></div><div class="cp done"></div><div class="cp active"></div>
     <div class="cp"></div><div class="cp"></div><div class="cp"></div>
-    <span class="cycle-label">шаг 3 / 6 · применение</span>
+    <span class="cycle-label">шаг 3 / 6 | применение</span>
   </div>
 
   <span class="tiny">Три кейса</span>
@@ -460,7 +460,7 @@ textarea:focus { border-bottom-color: var(--text); }
 
   <!-- ── КЕЙС 1 ─────────────────────────────────── -->
   <div id="case1wrap">
-    <span class="case-tag">Кейс 1 / 3 · Проверка фактов вместо проверки рамки</span>
+    <span class="case-tag">Кейс 1 / 3 </span>
     <p class="case-scenario">Вы попросили ИИ найти конкурентов вашей компании. В ответе есть:</p>
     <ul class="case-scenario">
       <li>список компаний</li>
@@ -486,7 +486,7 @@ textarea:focus { border-bottom-color: var(--text); }
   <!-- ── КЕЙС 2 (скрыт до ответа на кейс 1) ────── -->
   <div class="case-sep" id="sep12"></div>
   <div id="case2wrap" style="display:none">
-    <span class="case-tag">Кейс 2 / 3 · Проверка содержания вместо проверки отсутствующего</span>
+    <span class="case-tag">Кейс 2 / 3 </span>
     <p class="case-scenario">Вы попросили ИИ подготовить обзор рынка. Ответ выглядит подробным:</p>
     <ul class="case-scenario">
       <li>перечислены тренды</li>
@@ -510,7 +510,7 @@ textarea:focus { border-bottom-color: var(--text); }
   <!-- ── КЕЙС 3 (скрыт до ответа на кейс 2) ────── -->
   <div class="case-sep" id="sep23"></div>
   <div id="case3wrap" style="display:none">
-    <span class="case-tag">Кейс 3 / 3 · Проверка ответа вместо проверки альтернатив</span>
+    <span class="case-tag">Кейс 3 / 3</span>
     <p class="case-scenario">Вы попросили ИИ предложить стратегию выхода на новый рынок. Ответ выглядит разумно и подробно. Что вы сделаете дальше?</p>
     <div class="bq-choices">
       <button class="bq-btn" onclick="casePick(3,this,'verify_facts')">Проверю ключевые факты</button>
@@ -539,7 +539,7 @@ textarea:focus { border-bottom-color: var(--text); }
   <div class="cycle-progress">
     <div class="cp done"></div><div class="cp done"></div><div class="cp done"></div>
     <div class="cp active"></div><div class="cp"></div><div class="cp"></div>
-    <span class="cycle-label">шаг 4 / 6 · рефлексия</span>
+    <span class="cycle-label">шаг 4 / 6 | рефлексия</span>
   </div>
 
   <span class="tiny">Перед тем как ответить</span>
@@ -548,8 +548,8 @@ textarea:focus { border-bottom-color: var(--text); }
   <!-- ↓ Переходный текст — редактируйте свободно -->
   <div class="bridge-block">
     <p>Попробуйте вспомнить свои реальные рабочие задачи.</p>
-    <p>Скорее всего, вы не принимаете ответы ИИ бездумно. Скорее всего, вы действительно многое проверяете. Вопрос в другом.</p>
-    <p>Что происходит <em>до того</em>, как проверка понадобилась?</p>
+    <p>Скорее всего, вы не принимаете ответы ИИ бездумно. Скорее всего, вы действительно многое проверяете.</p>
+    <p>Но что происходит <em>до того</em>, как проверка понадобилась?</p>
     <p>Когда ответ уже получен, мозг естественным образом начинает работать внутри предложенной рамки. Он проверяет факты, ищет неточности, оценивает аргументы. Но гораздо реже задаётся вопросом: «А что, если сама рамка неверна?»</p>
     <p style="margin-bottom:0">Именно в этот момент чаще всего и возникает автоматическое доверие.</p>
   </div>
@@ -568,7 +568,7 @@ textarea:focus { border-bottom-color: var(--text); }
   <div class="cycle-progress">
     <div class="cp done"></div><div class="cp done"></div><div class="cp done"></div>
     <div class="cp done"></div><div class="cp active"></div><div class="cp"></div>
-    <span class="cycle-label">шаг 5 / 6 · рефлексия</span>
+    <span class="cycle-label">шаг 5 / 6 | рефлексия</span>
   </div>
 
   <span class="tiny">Про себя</span>
@@ -600,7 +600,7 @@ textarea:focus { border-bottom-color: var(--text); }
    ЭКРАН 5 · Артефакт
    ↓ РЕДАКТИРОВАТЬ: название артефакта, подписи полей
 ══════════════════════════════════════════════════ -->
-<!-- ПОВТОРНАЯ САМООЦЕНКА · перед персональным результатом -->
+<!-- ПОВТОРНАЯ САМООЦЕНКА -->
 <section class="screen" id="s4post">
   <span class="tiny">После диагностики и рефлексии</span>
   <div class="h2">Вернёмся к первому вопросу</div>
@@ -619,7 +619,7 @@ textarea:focus { border-bottom-color: var(--text); }
   <div class="cycle-progress">
     <div class="cp done"></div><div class="cp done"></div><div class="cp done"></div>
     <div class="cp done"></div><div class="cp done"></div><div class="cp active"></div>
-    <span class="cycle-label">шаг 6 / 6 · артефакт</span>
+    <span class="cycle-label">шаг 6 / 6 | артефакт</span>
   </div>
 
   <span class="tiny">Результат цикла</span>
@@ -631,7 +631,7 @@ textarea:focus { border-bottom-color: var(--text); }
   <div class="artifact-wrap">
     <div class="artifact-header">
       <div class="artifact-title">Мои зоны риска</div>
-      <div class="artifact-meta">Модуль 00 · элемент 2 из 9</div>
+      <div class="artifact-meta">Модуль 00 | элемент 2 из 9</div>
     </div>
     <div class="af-row">
       <div class="af-num">01</div>
@@ -668,7 +668,7 @@ textarea:focus { border-bottom-color: var(--text); }
         <div class="af-value empty">— сформулируется в М3 —</div>
       </div>
     </div>
-    <div class="artifact-footer">Протокол растёт вместе с курсом · М2 → М3 → … → М9</div>
+    <div class="artifact-footer">Протокол растёт вместе с курсом | М2 → М3 → … → М9</div>
   </div>
 
   <div class="btn-row">
@@ -700,8 +700,8 @@ textarea:focus { border-bottom-color: var(--text); }
 
   <!-- ↓ Превью следующего модуля — редактируйте название и описание -->
   <div class="next-module">
-    <span class="next-label">Следующий · Модуль 01</span>
-    <div class="next-title">Как я спрашиваю: формулировка запроса и её последствия</div>
+    <span class="next-label">Следующий | Модуль 01</span>
+    <div class="next-title">Как я спрашиваю: формулировка запроса и ответ</div>
     <div class="next-desc">Один и тот же вопрос — разные ответы. Разберём, как меняется результат в зависимости от того, как именно вы строите запрос.</div>
   </div>
 
